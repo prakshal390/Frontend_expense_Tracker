@@ -25,7 +25,6 @@ const Signup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Use environment variable for API base URL
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       const res = await axios.post(
         `${apiBaseUrl}/api/v3/user/register`,
@@ -45,11 +44,20 @@ const Signup = () => {
         toast.error(res.data.msg || "Signup failed");
       }
     } catch (error) {
-      console.log(error);
+      // Log the full error for debugging
+      console.log("Signup error:", error);
+
+      // Handle network errors
+      if (error.message === "Network Error") {
+        toast.error("Network error: Unable to reach the server.");
+        return;
+      }
+
       // Show actual backend error message if available
       const message =
         error.response?.data?.msg ||
         error.response?.data?.message ||
+        error.message ||
         "Signup failed. Please try again.";
       toast.error(message);
     }
