@@ -25,7 +25,14 @@ const Signup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      // Always use the deployed backend URL in production!
+      // VITE_API_BASE_URL must be set to your deployed backend, e.g.:
+      // VITE_API_BASE_URL=https://backend-expense-tracker-1-jwaw.onrender.com
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (!apiBaseUrl) {
+        toast.error("API base URL is not set. Please set VITE_API_BASE_URL in your .env file.");
+        return;
+      }
       const res = await axios.post(
         `${apiBaseUrl}/api/v3/user/register`,
         input,
@@ -47,9 +54,15 @@ const Signup = () => {
       // Log the full error for debugging
       console.log("Signup error:", error);
 
-      // Handle network errors
-      if (error.message === "Network Error") {
-        toast.error("Network error: Unable to reach the server.");
+      // Show more details for network errors
+      if (error.message === "Network Error" || error.code === "ERR_NETWORK") {
+        toast.error(
+          "Network error: Unable to reach the server.\n" +
+          "• Make sure your backend is deployed and accessible from your frontend.\n" +
+          "• Your frontend is currently trying to reach: " +
+          (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") +
+          "\n• If you see http://localhost:5000 in production, set VITE_API_BASE_URL to your deployed backend URL in your frontend .env file and redeploy."
+        );
         return;
       }
 
