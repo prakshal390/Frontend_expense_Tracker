@@ -25,8 +25,10 @@ const Signup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      // Use environment variable for API base URL
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       const res = await axios.post(
-        "https://backend-expense-tracker-1-jwaw.onrender.com/api/v3/user/register",
+        `${apiBaseUrl}/api/v3/user/register`,
         input,
         {
           headers: { "Content-Type": "application/json" },
@@ -39,12 +41,16 @@ const Signup = () => {
         setTimeout(() => {
           navigate("/login");
         }, 1500);
+      } else {
+        toast.error(res.data.msg || "Signup failed");
       }
     } catch (error) {
       console.log(error);
+      // Show actual backend error message if available
       const message =
         error.response?.data?.msg ||
-        "Account already exists with the same email";
+        error.response?.data?.message ||
+        "Signup failed. Please try again.";
       toast.error(message);
     }
   };
